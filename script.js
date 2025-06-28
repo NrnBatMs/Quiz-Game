@@ -8,38 +8,43 @@ function showQuestion() {
 
   const optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
+
   q.options.forEach(option => {
     const btn = document.createElement("button");
     btn.innerText = option;
-    btn.onclick = () => checkAnswer(option);
+    btn.onclick = () => checkAnswer(btn, option);
     optionsDiv.appendChild(btn);
   });
+
+  document.getElementById("scoreboard").innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
 }
 
-function checkAnswer(selected) {
-  if (selected === questions[currentQuestion].answer) {
-    alert("Correct!");
+function checkAnswer(button, selected) {
+  const correctAnswer = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll("#options button");
+
+  // Disable all buttons after one click
+  buttons.forEach(btn => btn.disabled = true);
+
+  // Mark correct and wrong
+  if (selected === correctAnswer) {
+    button.classList.add("correct");
     score++;
-  } else {
-    alert("Wrong!");
-  }
-}
 
-function nextQuestion() {
-  currentQuestion++;
-  if (currentQuestion < questions.length) {
-    showQuestion();
-  } else {
-    document.getElementById("game-container").innerHTML = `<h1>Game Over</h1><p>Your score: ${score}/${questions.length}</p>`;
-  }
-}
+    // Optional frog GIF beside correct button
+    const frogImg = document.createElement("img");
+    frogImg.src = "frog.gif"; // replace with your frog image URL
+    frogImg.style.width = "35px";
+    frogImg.style.marginLeft = "10px";
+    button.appendChild(frogImg);
 
-// ✅ Fetch questions from external JSON file
-fetch("questions.json")
-  .then(response => response.json())
-  .then(data => {
-    questions = data;
-    console.log(questions); // Check if loaded
-    showQuestion();
-  })
-  .catch(error => console.error("Failed to load questions:", error));
+  } else {
+    button.classList.add("wrong");
+    buttons.forEach(btn => {
+      if (btn.innerText === correctAnswer) {
+        btn.classList.add("correct");
+      }
+    });
+  }
+
+  // Show next quest
