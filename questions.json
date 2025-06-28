@@ -1,4 +1,4 @@
-const questions = [
+ [
   {
     text: "What does SBS stand for?",
     options: ["Safe Building Structure", "Secure Building Standard", "Smart Breathing Space", "Sick Building Syndrome"],
