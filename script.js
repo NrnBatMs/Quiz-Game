@@ -23,35 +23,40 @@ function checkAnswer(button, selected) {
   const correctAnswer = questions[currentQuestion].answer;
   const buttons = document.querySelectorAll("#options button");
 
-  // Disable all buttons after one click
+  // Disable all buttons
   buttons.forEach(btn => btn.disabled = true);
 
-  // Position frog image beside clicked button
-  const frog = document.getElementById("froggy");
+  // Get or create frog image
+  let frog = document.getElementById("froggy");
+  if (!frog) {
+    frog = document.createElement("img");
+    frog.id = "froggy";
+    frog.src = "froggy.gif";
+    frog.style.position = "absolute";
+    frog.style.width = "50px";
+    frog.style.zIndex = "10";
+    document.body.appendChild(frog);
+  }
+
+  // Position frog at selected button
   const rect = button.getBoundingClientRect();
   frog.style.top = `${rect.top + window.scrollY - 20}px`;
   frog.style.left = `${rect.left + window.scrollX - 60}px`;
-  frog.classList.add("frog-jump");
   frog.style.display = "block";
 
-  setTimeout(() => {
-    frog.style.display = "none";
-    frog.classList.remove("frog-jump");
+  if (selected === correctAnswer) {
+    button.classList.add("correct");
+    score++;
+  } else {
+    button.classList.add("wrong");
+    buttons.forEach(btn => {
+      if (btn.innerText === correctAnswer) {
+        btn.classList.add("correct");
+      }
+    });
+  }
 
-    if (selected === correctAnswer) {
-      button.classList.add("correct");
-      score++;
-    } else {
-      button.classList.add("wrong");
-      buttons.forEach(btn => {
-        if (btn.innerText === correctAnswer) {
-          btn.classList.add("correct");
-        }
-      });
-    }
-
-    setTimeout(nextQuestion, 800);
-  }, 700);
+  document.getElementById("scoreboard").innerText = `Score: ${score}`;
 }
 
 function nextQuestion() {
