@@ -1,71 +1,67 @@
 let questions = [];
 let currentQuestion = 0;
 let score = 0;
+let lives = 5;
+
+const frog = document.getElementById("frog");
+const resultImg = document.getElementById("result-img");
 
 function showQuestion() {
+  if (currentQuestion >= questions.length) {
+    endGame();
+    return;
+  }
+
   const q = questions[currentQuestion];
   document.getElementById("question").innerText = q.text;
+  document.getElementById("scoreboard").innerText = `Score: ${score}`;
+  document.getElementById("lives").innerText = `Lives: ${lives}`;
 
-  const optionsDiv = document.getElementById("options");
-  optionsDiv.innerHTML = "";
-
-  q.options.forEach(option => {
-    const btn = document.createElement("button");
-    btn.innerText = option;
-    btn.onclick = () => checkAnswer(btn, option);
-    optionsDiv.appendChild(btn);
+  q.options.forEach((opt, i) => {
+    const btn = document.getElementById(`btn${i}`);
+    btn.innerText = opt;
+    btn.disabled = false;
+    btn.onclick = () => selectAnswer(btn, opt);
   });
-
-  document.getElementById("scoreboard").innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
 }
 
-function checkAnswer(button, selected) {
-  const correctAnswer = questions[currentQuestion].answer;
-  const buttons = document.querySelectorAll("#options button");
+function selectAnswer(button, selected) {
+  const correct = questions[currentQuestion].answer;
+  const rect = button.getBoundingClientRect();
+
+  // Move frog to clicked button
+  frog.style.left = `${rect.left + rect.width / 2 - 40}px`;
 
   // Disable all buttons
-  buttons.forEach(btn => btn.disabled = true);
+  for (let i = 0; i < 4; i++) document.getElementById(`btn${i}`).disabled = true;
 
-  // Get or create frog image
-  let frog = document.getElementById("froggy");
-  if (!frog) {
-    frog = document.createElement("img");
-    frog.id = "froggy";
-    frog.src = "froggy.gif";
-    frog.style.position = "absolute";
-    frog.style.width = "50px";
-    frog.style.zIndex = "10";
-    document.body.appendChild(frog);
-  }
-
-  // Position frog at selected button
-  const rect = button.getBoundingClientRect();
-  frog.style.top = `${rect.top + window.scrollY - 20}px`;
-  frog.style.left = `${rect.left + window.scrollX - 60}px`;
-  frog.style.display = "block";
-
-  if (selected === correctAnswer) {
-    button.classList.add("correct");
+  // Show result
+  if (selected === correct) {
     score++;
+    resultImg.src = "true.gif";
   } else {
-    button.classList.add("wrong");
-    buttons.forEach(btn => {
-      if (btn.innerText === correctAnswer) {
-        btn.classList.add("correct");
-      }
-    });
+    lives--;
+    resultImg.src = "wrong.gif";
   }
+  resultImg.style.display = "block";
 
-  document.getElementById("scoreboard").innerText = `Score: ${score}`;
+  setTimeout(() => {
+    resultImg.style.display = "none";
+    currentQuestion++;
+    if (lives > 0) {
+      showQuestion();
+    } else {
+      endGame();
+    }
+  }, 1000);
 }
 
-function nextQuestion() {
-  currentQuestion++;
-  if (currentQuestion < questions.length) {
-    showQuestion();
-  } else {
-    document.getElementById("game-container").innerHTML = `<h1>🎉 Game Over 🎉</h1><p>Your score: ${score}/${questions.length}</p>`;
-  }
+function endGame() {
+  document.getElementById("question").innerText = "Game Over!";
+  document.getElementById("scoreboard").innerText = `Final Score: ${score}`;
+  document.getElementById("lives").innerText = "";
+  document.getElementById("options").style.display = "none";
+  frog.style.display = "none";
 }
 
 fetch("questions.json")
@@ -73,5 +69,4 @@ fetch("questions.json")
   .then(data => {
     questions = data;
     showQuestion();
-  })
-  .catch(error => console.error("Failed to load questions:", error));
+  });
