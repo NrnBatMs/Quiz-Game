@@ -1,17 +1,4 @@
-
-const questions = [
-  {
-    text: "What is the capital of Malaysia?",
-    options: ["Kuala Lumpur", "Johor Bahru", "Penang", "Melaka"],
-    answer: "Kuala Lumpur"
-  },
-  {
-    text: "What is 2 + 2?",
-    options: ["3", "4", "5", "6"],
-    answer: "4"
-  }
-];
-
+let questions = [];
 let currentQuestion = 0;
 let score = 0;
 
@@ -47,4 +34,10 @@ function nextQuestion() {
   }
 }
 
-window.onload = showQuestion;
+fetch("questions.json")
+  .then(response => response.json())
+  .then(data => {
+    questions = data;
+    showQuestion();
+  })
+  .catch(error => console.error("Failed to load questions:", error));
