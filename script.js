@@ -26,38 +26,23 @@ function checkAnswer(button, selected) {
   // Disable all buttons after one click
   buttons.forEach(btn => btn.disabled = true);
 
-  // Get button position for placing GIF
+  // Position frog image beside clicked button
+  const frog = document.getElementById("froggy");
   const rect = button.getBoundingClientRect();
+  frog.style.top = `${rect.top + window.scrollY - 20}px`;
+  frog.style.left = `${rect.left + window.scrollX - 60}px`;
+  frog.classList.add("frog-jump");
+  frog.style.display = "block";
 
-  // Create Froggy GIF element
-  const froggy = document.createElement("img");
-  froggy.src = "images/froggy.gif"; // make sure your image path is correct
-  froggy.style.width = "50px";
-  froggy.style.position = "absolute";
-  froggy.style.left = rect.left + "px";
-  froggy.style.top = rect.top + "px";
-  froggy.classList.add("frog-jump");
-  document.body.appendChild(froggy);
-
-  // After frog jumps (700ms), show result image
   setTimeout(() => {
-    froggy.remove();
-
-    const resultImg = document.createElement("img");
-    resultImg.style.width = "60px";
-    resultImg.style.position = "absolute";
-    resultImg.style.left = rect.left + "px";
-    resultImg.style.top = rect.top + "px";
+    frog.style.display = "none";
+    frog.classList.remove("frog-jump");
 
     if (selected === correctAnswer) {
       button.classList.add("correct");
       score++;
-      resultImg.src = "images/true.gif"; // your true GIF
     } else {
       button.classList.add("wrong");
-      resultImg.src = "images/wrong.gif"; // your wrong GIF
-
-      // Highlight the correct answer button too
       buttons.forEach(btn => {
         if (btn.innerText === correctAnswer) {
           btn.classList.add("correct");
@@ -65,15 +50,23 @@ function checkAnswer(button, selected) {
       });
     }
 
-    document.body.appendChild(resultImg);
-
-    // Remove result image after 1s
-    setTimeout(() => resultImg.remove(), 1000);
-
-  }, 700); // Wait for frog jump
-
-  // Move to next question after 1.7 seconds
-  setTimeout(nextQuestion, 1700);
+    setTimeout(nextQuestion, 800);
+  }, 700);
 }
 
-  // Show next quest
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    showQuestion();
+  } else {
+    document.getElementById("game-container").innerHTML = `<h1>🎉 Game Over 🎉</h1><p>Your score: ${score}/${questions.length}</p>`;
+  }
+}
+
+fetch("questions.json")
+  .then(response => response.json())
+  .then(data => {
+    questions = data;
+    showQuestion();
+  })
+  .catch(error => console.error("Failed to load questions:", error));
